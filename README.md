@@ -2,6 +2,10 @@
 
 A web-based AI voice detection system that analyzes audio files to determine whether they are AI-generated or human voices. Built with Flask and featuring a modern dark-themed interface.
 
+## Live preview
+
+https://aivoicedetection-t1hm.onrender.com/
+
 ## Features
 
 - 🎤 Multiple audio input methods (file upload, URL, base64)
