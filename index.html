@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Detection</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+            min-height: 100vh;
+            color: #fff;
+        }
+        header {
+            background: #111;
+            border-bottom: 1px solid #222;
+            padding: 24px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo img {
+            width: 40px;
+            height: 40px;
+        }
+        .logo h1 {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #fff;
+        }
+        .container { 
+            max-width: 700px;
+            margin: 60px auto;
+            background: #111;
+            padding: 50px;
+            border-radius: 12px;
+            border: 1px solid #222;
+        }
+        .page-title {
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 2.2em;
+            color: #fff;
+            font-weight: 600;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 0.95em;
+        }
+        .form-group { margin-bottom: 24px; }
+        label { 
+            display: block;
+            margin-bottom: 10px;
+            color: #aaa;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+        input, textarea, select { 
+            width: 100%;
+            padding: 14px 16px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #fff;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #fff;
+            background: #0a0a0a;
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        select { cursor: pointer; }
+        button { 
+            width: 100%;
+            padding: 16px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        button:hover { 
+            background: #e5e5e5;
+        }
+        button:disabled { 
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+        button svg {
+            width: 18px;
+            height: 18px;
+        }
+        .result { 
+            margin-top: 30px;
+            padding: 24px;
+            border-radius: 8px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .success { 
+            background: #0a0a0a;
+            border: 1px solid #333;
+        }
+        .error { 
+            background: #1a0000;
+            border: 1px solid #440000;
+            color: #ff6b6b;
+        }
+        .result-label { 
+            font-size: 18px;
+            font-weight: 600;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .result-label svg {
+            width: 28px;
+            height: 28px;
+        }
+        .ai-generated { 
+            background: #1a0000;
+            border: 1px solid #440000;
+            color: #ff6b6b;
+        }
+        .human { 
+            background: #001a00;
+            border: 1px solid #004400;
+            color: #6bff6b;
+        }
+        input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        input[type="file"]::file-selector-button {
+            background: #222;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            margin-right: 10px;
+            font-weight: 500;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background: #333;
+        }
+        footer {
+            background: #111;
+            border-top: 1px solid #222;
+            margin-top: 80px;
+            padding: 40px 20px;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .footer-text {
+            color: #888;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer-text svg {
+            width: 18px;
+            height: 18px;
+            fill: #fff;
+        }
+        .footer-text strong {
+            color: #fff;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png" alt="AI Voice Logo">
+                <h1>AI Voice Detection</h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 class="page-title">Voice Analysis System</h2>
+        <p class="subtitle">Upload or provide audio to detect AI-generated voices</p>
+        
+        <div class="form-group">
+            <label>Audio Input Type</label>
+            <select id="inputType" onchange="toggleInput()">
+                <option value="file">Upload Audio File</option>
+                <option value="url">Audio URL</option>
+                <option value="base64">Base64 Encoded</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="fileInput">
+            <label>Upload Audio File</label>
+            <input type="file" id="audioFile" accept="audio/*">
+        </div>
+        
+        <div class="form-group" id="urlInput" style="display:none;">
+            <label>Audio File URL</label>
+            <input type="text" id="audioUrl" placeholder="https://example.com/audio.mp3">
+        </div>
+        
+        <div class="form-group" id="base64Input" style="display:none;">
+            <label>Base64 Encoded Audio</label>
+            <textarea id="audioBase64" rows="4" placeholder="Paste base64 encoded MP3 here..."></textarea>
+        </div>
+        
+        <button onclick="testEndpoint()">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 10V3L4 14H11L11 21L20 10H13Z" fill="currentColor"/>
+            </svg>
+            Analyze Audio
+        </button>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function toggleInput() {
+            const type = document.getElementById('inputType').value;
+            document.getElementById('fileInput').style.display = type === 'file' ? 'block' : 'none';
+            document.getElementById('urlInput').style.display = type === 'url' ? 'block' : 'none';
+            document.getElementById('base64Input').style.display = type === 'base64' ? 'block' : 'none';
+        }
+        
+        async function testEndpoint() {
+            const endpoint = '/detect';
+            const apiKey = 'your-secret-api-key-12345';
+            const inputType = document.getElementById('inputType').value;
+            const audioUrl = document.getElementById('audioUrl').value;
+            const audioBase64 = document.getElementById('audioBase64').value;
+            const audioFile = document.getElementById('audioFile').files[0];
+            const resultDiv = document.getElementById('result');
+            const button = document.querySelector('button');
+            
+            let audioInput = null;
+            let payload = {};
+            
+            if (inputType === 'url') {
+                audioInput = audioUrl;
+                payload = { audio_url: audioUrl };
+            } else if (inputType === 'base64') {
+                audioInput = audioBase64;
+                payload = { audio_base64: audioBase64 };
+            } else if (inputType === 'file') {
+                if (!audioFile) {
+                    resultDiv.className = 'result error';
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = '<svg style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24" fill="#ff6b6b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Please select an audio file';
+                    return;
+                }
+                audioInput = audioFile;
+            }
+            
+            if (!audioInput) {
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<svg style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24" fill="#ff6b6b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Please fill in all required fields';
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation: spin 1s linear infinite;"><style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}</style><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="4" fill="none"/></svg> Analyzing...';
+            resultDiv.style.display = 'none';
+            
+            try {
+                if (inputType === 'file') {
+                    const reader = new FileReader();
+                    const base64Promise = new Promise((resolve, reject) => {
+                        reader.onload = () => {
+                            const base64 = reader.result.split(',')[1];
+                            resolve(base64);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(audioFile);
+                    });
+                    const base64Data = await base64Promise;
+                    payload = { audio_base64: base64Data };
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const isAI = data.classification === 'AI-Generated';
+                    const iconSvg = isAI ? 
+                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z"/></svg>' :
+                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <div style="text-align: center; color: #6bff6b; font-weight: 600; margin-bottom: 15px;">
+                            <svg style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                            Analysis Complete
+                        </div>
+                        <div class="result-label ${isAI ? 'ai-generated' : 'human'}">
+                            ${iconSvg}
+                            <div>
+                                ${data.classification}
+                                <div style="font-size: 0.8em; margin-top: 5px; opacity: 0.8;">${data.confidence_score}% Confidence</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; color: #aaa; line-height: 1.6;">
+                            <strong style="color: #fff;">Analysis:</strong><br>${data.explanation}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <svg style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24" fill="#ff6b6b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <strong>Error ${response.status}</strong><br>${data.error || data.message}
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<svg style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24" fill="#ff6b6b"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> <strong>Request Failed</strong><br>${error.message}`;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 10V3L4 14H11L11 21L20 10H13Z" fill="currentColor"/></svg> Analyze Audio';
+                resultDiv.style.display = 'block';
+            }
+        }
+    </script>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">
+                Made with 
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                by <strong>Prashant</strong>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
