@@ -1,24 +1,67 @@
-# AI-Generated Voice Detection API
+# AI Voice Detection System
 
-## Quick Start
+A web-based AI voice detection system that analyzes audio files to determine whether they are AI-generated or human voices. Built with Flask and featuring a modern dark-themed interface.
 
-1. Install dependencies:
+## Features
+
+- 🎤 Multiple audio input methods (file upload, URL, base64)
+- 🔒 API key authentication
+- 🎨 Modern dark UI with responsive design
+- 📊 Confidence score and detailed analysis
+- 🚀 Easy deployment on Render, Heroku, or Railway
+
+## Demo
+
+![AI Voice Detection Interface](https://via.placeholder.com/800x400?text=AI+Voice+Detection+Interface)
+
+## Tech Stack
+
+- **Backend:** Flask (Python)
+- **Frontend:** HTML, CSS, JavaScript
+- **Deployment:** Gunicorn WSGI server
+
+## Installation
+
+### Prerequisites
+
+- Python 3.8 or higher
+- pip package manager
+
+### Local Setup
+
+1. Clone the repository:
+```bash
+git clone <your-repo-url>
+cd guvihackathon
+```
+
+2. Create a virtual environment:
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run the API:
+4. Run the application:
 ```bash
 python app.py
 ```
 
-API will be available at `http://localhost:5000`
+5. Open your browser and navigate to:
+```
+http://localhost:5000
+```
 
-## API Endpoint
+## API Documentation
 
-**POST** `/detect`
+### Authentication
 
-### Headers
+All API requests require authentication using an API key. Include the key in the request header:
+
 ```
 Authorization: your-secret-api-key-12345
 ```
@@ -27,39 +70,139 @@ or
 X-API-Key: your-secret-api-key-12345
 ```
 
-### Request Body
+**Note:** Change the default API key in `app.py` before deploying to production.
+
+### Endpoint: `/detect`
+
+**Method:** POST
+
+**Request Body:**
+
+Option 1 - Audio URL:
 ```json
 {
-  "audio_url": "https://example.com/audio.mp3",
-  "message": "Test request description"
+  "audio_url": "https://example.com/audio.mp3"
 }
 ```
 
-### Response
+Option 2 - Base64 Encoded Audio:
 ```json
 {
-  "status": "success",
-  "message": "Test request description",
-  "result": {
-    "is_ai_generated": true,
-    "confidence": 85.5,
-    "label": "AI-Generated"
-  }
+  "audio_base64": "base64_encoded_audio_data_here"
 }
 ```
 
-## Testing with cURL
+**Response:**
+
+```json
+{
+  "classification": "AI-Generated",
+  "confidence_score": 85.5,
+  "explanation": "Audio exhibits synthetic patterns in frequency distribution typical of AI-generated speech."
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `400` - Bad Request (missing or invalid parameters)
+- `401` - Unauthorized (invalid API key)
+- `500` - Server Error
+
+### Example cURL Request
 
 ```bash
-curl -X POST http://localhost:5000/detect \
+curl -X POST https://your-app.onrender.com/detect \
   -H "Authorization: your-secret-api-key-12345" \
   -H "Content-Type: application/json" \
-  -d '{"audio_url": "https://example.com/sample.mp3", "message": "Test"}'
+  -d '{"audio_url": "https://example.com/sample.mp3"}'
 ```
 
 ## Deployment
 
-For deployment (Heroku, Railway, Render):
-- Update API_KEY in app.py with environment variable
-- Ensure all dependencies are in requirements.txt
-- Use production WSGI server (gunicorn)
+### Deploy on Render
+
+1. Push your code to GitHub
+2. Go to [Render Dashboard](https://render.com)
+3. Click "New +" → "Web Service"
+4. Connect your GitHub repository
+5. Configure:
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `gunicorn app:app`
+6. Click "Create Web Service"
+
+### Deploy on Heroku
+
+1. Install Heroku CLI
+2. Login and create app:
+```bash
+heroku login
+heroku create your-app-name
+```
+
+3. Deploy:
+```bash
+git push heroku main
+```
+
+### Deploy on Railway
+
+1. Go to [Railway](https://railway.app)
+2. Click "New Project" → "Deploy from GitHub"
+3. Select your repository
+4. Railway will auto-detect and deploy
+
+## Environment Variables
+
+For production deployment, set these environment variables:
+
+- `API_KEY` - Your custom API key (default: `your-secret-api-key-12345`)
+- `PORT` - Port number (automatically set by hosting platforms)
+
+## Security Notes
+
+⚠️ **Important for Production:**
+
+1. **Change the default API key** in `app.py` or use environment variables
+2. **Remove or secure the Gemini API key** if not in use
+3. Consider implementing rate limiting
+4. Use HTTPS in production
+5. Implement proper logging and monitoring
+
+## Project Structure
+
+```
+guvihackathon/
+├── app.py              # Flask application
+├── index.html          # Frontend interface
+├── requirements.txt    # Python dependencies
+├── render.yaml         # Render deployment config
+├── .gitignore         # Git ignore rules
+└── README.md          # Documentation
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Acknowledgments
+
+- Built for Guvi Hackathon
+- Made with ❤️ by Prashant
+
+## Support
+
+For issues, questions, or suggestions, please open an issue on GitHub.
+
+---
+
+**Note:** This is a demonstration project. The AI detection algorithm uses a simplified approach for demo purposes. For production use, integrate with actual AI voice detection models or services.
